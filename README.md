@@ -1,7 +1,5 @@
 # @cardstack/logger
 
-<img width="647" src="https://user-images.githubusercontent.com/71256/29091486-fa38524c-7c37-11e7-895f-e7ec8e1039b6.png">
-
 A fork of tj's [`debug`](https://github.com/visionmedia/debug), modified
 to add log levels, and better global configuration support. This readme
 only documents the differences.
@@ -19,25 +17,18 @@ We will likely add it back in.
 
 ## Application-level (global) config
 
-For a utility library like a logger, it is possible for multiple
-versions to be loaded by different dependent modules. An application
-consuming multiple libraries, using different versions of the logger,
-should be able to specify configuration about logging levels in one
-place. So, the first loaded instance of the logger "wins" and registers
-itself to be used globally. Other instances loaded later will delegate
-to the first loaded. This also allows configuration to apply to all
-libraries doing logging.
+It's possible for multiple versions of a library to be loaded by
+different dependent modules. While usually this causes no issues,
+for something like a logger it's best to be able to configure it in
+once place, and have multiple versions co-operate and share this
+configuration.
 
-Configuration options available:
-```
-require('@cardstack/logger').configure({
-  // logging levels are discussed in more detail below
-  defaultLevel: 'warn',
-  loggerLevels: {
-    'cardstack:*': 'info'
-  }
-});
-```
+So, the first loaded instance of `@cardstack/logger` "wins", and
+registers itself to be used globally. Other instances loaded later will
+delegate to that global logger.
+
+This configuation is done via the [`configure`](#configure) method on the
+module instance.
 
 ## Log levels
 
@@ -65,9 +56,11 @@ certain channels at runtime.
 ```
 let log = require('@cardstack/logger')('channel-name');
 
+log.log("ok, the crash isn't coming from the require step");
+
 log.info('Application starting');
 if (!GlobalCache) {
-  log.warning('The GlobalCache module hasn't been loaded. The application may run slower than expected');
+  log.warn('The GlobalCache module hasn't been loaded. The application may run slower than expected');
 }
 
 try {
@@ -89,27 +82,45 @@ setInterval(function() {
 }, 50);
 ```
 
-You can configure logging levels per-channel, as well as specify the
-default logging levels for any channels not explicitly configured.
+You can configure logging-levels per-channel, as well as specify the
+default logging level for unconfigured channels.
 
 When you specify a logging level, messages of that level and higher are
 shown. `trace` is the lowest level, and `error` is the highest. You can
 also specify `none` to silence all messages.
 
-The internal default logging level is `info`.
+If you don't specify a default logging level, `info` is used.
 
-Default logger level can be specified by the `defaultLevel`
-configuration option, or overridden at runtime with the
-`LOGGER_DEFAULT_LEVEL` environment variable.
+If multiple patterns match a channel, the last-specified one will apply.
 
-Per-channel levels can be specified for `configure` with an object, or
-overridden at runtime with the `LOGGER_LEVELS` environment variable,
-which is a comma-separated list of `pattern=level` pairs:
+Application default logging levels are set via the [`configure`
+method](#configure), or set at runtime via [environment
+variables](#environment-variables)
+
+## Docs
+
+### `configure`
+Use the `configure` method on the module instance to set
+application-level defaults. Library authors should _not_ call this
+method.
+
 ```
-LOGGER_LEVELS='cardstack:noisy-plugin=none,cardstack:hub=debug' node app.js
+require('@cardstack/logger').configure({
+  defaultLevel: 'warn',
+  logLevels: [
+    ['cardstack:*', 'info'],
+    ['noisy-module', 'error']
+  ]
+});
 ```
-If multiple patterns match, it will be the last-specified rule that
-applies.
+
+### Environment variables
+Logging levels for a given application run can be set with environment
+variables. This overrides application defaults set with `configure`.
+
+```
+DEFAULT_LOG_LEVEL=warn LOG_LEVELS='cardstack:*=info,noisy-module=trace' node app.js
+```
 
 
 ## License
