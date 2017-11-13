@@ -1,2 +1,4 @@
-mocha test/spec
-echo 'Otherwise, looks good.'
+# mocha test/spec
+# echo 'Otherwise, looks good.'
+
+node test/example.js
