@@ -27,8 +27,9 @@ So, the first loaded instance of `@cardstack/logger` "wins", and
 registers itself to be used globally. Other instances loaded later will
 delegate to that global logger.
 
-This configuation is done via the [`configure`](#configure) method on the
-module instance.
+This configuation is done via the [`configure()`](#configure) and
+[`registerFormatter()`](#registerformatter) methods on the module
+instance.
 
 ## Log levels
 
@@ -120,6 +121,21 @@ variables. This overrides application defaults set with `configure`.
 
 ```
 DEFAULT_LOG_LEVEL=warn LOG_LEVELS='cardstack:*=info,noisy-module=trace' node app.js
+```
+
+### `registerFormatter`
+To add a `%`-style formatter to use in your log messages, use the
+`registerFormatter` method. Trying to register a second formatter for
+the same letter will cause an error.
+```
+const logger = require('@cardstack/logger')
+// Display as hex
+logger.registerFormatter('x', function(val) {
+  return parseInt(val).toString(16);
+});
+
+logger('cardstack:example').info('%d is "%x" in hex', 51966, 51966);
+// 51966 is "cafe" in hex
 ```
 
 
