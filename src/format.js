@@ -13,3 +13,19 @@ module.exports.color = function(text, color, {bold}={}) {
 module.exports.prefixLines = function(prefix, text) {
   return text.split('\n').map(line => prefix + line).join('\n');
 };
+
+module.exports.runFormatters = function(args, formatters) {
+  let result = args.slice();
+  let str = result[0];
+  let index = 0;
+  result[0] = str.replace(/%([a-zA-Z])/g, function(match, letter) {
+    index++;
+    if (formatters[letter]) {
+      result[index] = formatters[letter](result[index]);
+      return '%s';
+    } else {
+      return match;
+    }
+  });
+  return result;
+};
