@@ -15,4 +15,24 @@ describe("Channel pattern stuff", function() {
       assert.ok(re.test('[abc]'));
     });
   });
+
+  describe("#findMatch", function() {
+    it("finds the last matching value from a list", function() {
+      let rules = [
+        [/q/, 0],
+        [/[abc]/, 1],
+        [/./, 2]
+      ];
+      let result = patterns.findMatch(rules, 'b');
+      assert.equal(result, 2);
+    });
+
+    it("returns the default if none match", function() {
+      let rules = [
+        [/q/, 0]
+      ];
+      let result = patterns.findMatch(rules, 'b', 'none');
+      assert.equal(result, 'none');
+    });
+  });
 });
