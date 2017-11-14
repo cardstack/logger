@@ -9,3 +9,7 @@ module.exports.color = function(text, color, {bold}={}) {
   }
   return `\u001b[${color}m${text}\u001b[0m`;
 };
+
+module.exports.prefixLines = function(prefix, text) {
+  return text.split('\n').map(line => prefix + line).join('\n');
+};
