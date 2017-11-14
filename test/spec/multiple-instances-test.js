@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-describe('Multiple instances', function() {
+xdescribe('Multiple instances', function() {
   it('share one configuration', function() {
     delete require.cache['@cardstack/logger'];
     let count = 0;
