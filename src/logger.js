@@ -1,4 +1,4 @@
-const {formatMessage} = require('@cardstack/logger/src/format');
+const {formatMessage} = require('./format');
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error', 'none'];
 
