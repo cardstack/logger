@@ -5,7 +5,7 @@ const levels = ['trace', 'debug', 'info', 'warn', 'error', 'none'];
 class Logger {
   constructor(name, level, config={}) {
     this.name = name;
-    this.level = levels.indexOf(level);
+    this.level = level;
 
     let {
       color,
@@ -18,6 +18,14 @@ class Logger {
     this.interactive = interactive;
     this._log = log;
     this._lastTimestamp = new Date();
+  }
+
+  get level() {
+    return levels[this._level];
+  }
+
+  set level(newLevel) {
+    this._level = levels.indexOf(newLevel);
   }
 
   _doLog() {
@@ -53,7 +61,7 @@ class Logger {
 // we slice() so we don't add a "none" method
 for (let i in levels.slice(0, -1)) {
   Logger.prototype[levels[i]] = function() {
-    if (i >= this.level) {
+    if (i >= this._level) {
       this._doLog(...arguments);
     }
   }
