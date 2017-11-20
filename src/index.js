@@ -4,6 +4,7 @@ const color = require('./color');
 const Logger = require('./logger');
 const env = require('./environment');
 const patterns = require('./patterns');
+const levels = require('./levels');
 
 
 function createLogger(name) {
@@ -12,10 +13,18 @@ function createLogger(name) {
     color: color.choose(name),
     formatters: createLogger.config.formatters,
     interactive: createLogger.config.interactive,
-    log: console.error
+    log: doLog
   });
   createLogger.instances.push(log);
   return log;
+}
+
+function doLog(instance, level, formatArgs) {
+  if (level === levels.LOG) {
+    console.error(instance.formatMessage(formatArgs));
+  } else if (level >= instance._level) {
+    console.error(instance.formatMessage(formatArgs));
+  }
 }
 
 createLogger.config = {

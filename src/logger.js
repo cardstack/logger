@@ -1,6 +1,5 @@
-const {formatMessage} = require('./format');
-
-const levels = ['trace', 'debug', 'info', 'warn', 'error', 'none'];
+const format = require('./format');
+const levels = require('./levels');
 
 class Logger {
   constructor(name, level, config={}) {
@@ -18,21 +17,19 @@ class Logger {
     this.formatters = formatters;
     this.interactive = interactive;
     this.timestamps = timestamps;
-    this._log = log;
     this._lastTimestamp = new Date();
+    // This will determine whether to actually output the message, and will
+    // call our formatMessage() if necessary. We push the logic out there to
+    // preserve performance while enabling the fancy expectWarn assertions.
+    this._log = log;
   }
 
-  get level() {
-    return levels[this._level];
-  }
-
+  // accepts string for easy translation from config
   set level(newLevel) {
     this._level = levels.indexOf(newLevel);
   }
 
-  _doLog() {
-    let args = Array.from(arguments);
-
+  formatMessage(formatArgs) {
     let now = new Date();
     let prev = this._lastTimestamp;
     this._lastTimestamp = now;
@@ -54,24 +51,20 @@ class Logger {
       }
     }
 
-    let message = formatMessage(Array.from(arguments), this.name, opts);
-
-    this._log(message);
+    return format.formatMessage(formatArgs, this.name, opts);
   }
 
   // log.log always outputs, for development stuff only
-  log() {
-    this._doLog(...arguments);
+  log(...formatArgs) {
+    this._log(this, levels.LOG, formatArgs);
   }
 };
 
 // adds log.trace, log.debug, etc.
 // we slice() so we don't add a "none" method
 for (let i in levels.slice(0, -1)) {
-  Logger.prototype[levels[i]] = function() {
-    if (i >= this._level) {
-      this._doLog(...arguments);
-    }
+  Logger.prototype[levels[i]] = function(...formatArgs) {
+    this._log(this, i, formatArgs);
   }
 }
 
