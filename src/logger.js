@@ -5,16 +5,15 @@ class Logger {
   constructor(name, level, config={}) {
     this.name = name;
     this.level = level;
+    this.formatters = {};
 
     let {
       color,
-      formatters,
       interactive,
       log,
       timestamps
     } = config;
     this.color = color;
-    this.formatters = formatters;
     this.interactive = interactive;
     this.timestamps = timestamps;
     this._lastTimestamp = new Date();
@@ -27,6 +26,13 @@ class Logger {
   // accepts string for easy translation from config
   set level(newLevel) {
     this._level = levels.indexOf(newLevel);
+  }
+
+  registerFormatter(letter, formatter) {
+    if (this.formatters[letter]) {
+      throw new Error(`A formatter for "${letter}" has already been registered`);
+    }
+    this.formatters[letter] = formatter;
   }
 
   formatMessage(formatArgs) {
