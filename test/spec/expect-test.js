@@ -52,6 +52,13 @@ describe("Logger expectations", function() {
       log.info('message');
     });
   });
-  xit("support async callbacks", async function() {});
+
+  it("support async callbacks", async function() {
+    await logger.expectInfo(/message/, async function() {
+      await Promise.resolve();
+      log.info('message');
+    });
+  });
+
   xit("detect attempts to nest expectations", async function() {});
 });
