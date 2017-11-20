@@ -15,14 +15,23 @@ describe("Logger expectations", function() {
     try {
       await logger.expectInfo(/message/, function() {/* noop */});
     } catch (e) {
-      assert.ok(e instanceof Error, "The expectation rejects with an error");
       assert.equal(e.message, "Expected a log message to match /message/ but none did");
       return;
     }
     assert.fail("expectInfo should throw if it was not matched");
   });
 
-  xit("fail if the wrong number of matches occur", async function() {});
+  it("fail if the wrong number of matches occur", async function() {
+    try {
+      await logger.expectInfo(/message/, {count: 2}, function() {
+        log.info('message');
+      });
+    } catch (e) {
+      assert.equal(e.message, "Wrong number of logs matching /message/. Expected 2, got 1");
+      return;
+    }
+    assert.fail("expectInfo should throw if the wrong number of logs happen");
+  });
   xit("pass if only allowed non-matching log levels are triggered", async function() {});
   xit("fail if not-allowed log levels are triggered", async function() {});
   xit("support async callbacks", async function() {});

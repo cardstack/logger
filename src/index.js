@@ -81,6 +81,8 @@ for (let i in levels.slice(0, -1)) {
       options = {};
     }
 
+    let count = options.count || 1;
+
     let expectation = {
       level,
       pattern,
@@ -92,8 +94,10 @@ for (let i in levels.slice(0, -1)) {
     } finally {
       delete createLogger.expectation;
     }
-    if (expectation.matches !== 1) {
+    if (expectation.matches === 0) {
       throw new Error(`Expected a log message to match ${pattern} but none did`);
+    } else if (expectation.matches !== count) {
+      throw new Error(`Wrong number of logs matching ${pattern}. Expected ${count}, got ${expectation.matches}`);
     }
   }
 }
