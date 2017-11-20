@@ -3,7 +3,6 @@ const logger = require('@cardstack/logger');
 
 const log = logger('expect');
 
-
 describe("Logger expectations", function() {
   it("pass if the expected messages are logged", async function() {
     await logger.expectInfo(/message/, function() {
@@ -32,8 +31,27 @@ describe("Logger expectations", function() {
     }
     assert.fail("expectInfo should throw if the wrong number of logs happen");
   });
-  xit("pass if only allowed non-matching log levels are triggered", async function() {});
-  xit("fail if not-allowed log levels are triggered", async function() {});
+
+  it("fail if not-allowed log levels are triggered", async function arbitraryFunctionName() {
+    try {
+      await logger.expectInfo(/message/, function() {
+        log.warn('shit');
+        log.info('message');
+      });
+    } catch (e) {
+      assert.ok(/An unexpected warn was logged/.test(e.message), "The error contains the level of the unexpected log");
+      assert.ok(/shit/.test(e.message), "The error contains the original message");
+      return;
+    }
+    assert.fail("expectInfo should throw if an unexpected warn is logged");
+  });
+
+  it("pass if only allowed non-matching log levels are triggered", async function() {
+    await logger.expectInfo(/message/, {allowed: ['warn']}, function() {
+      log.warn('this is fine');
+      log.info('message');
+    });
+  });
   xit("support async callbacks", async function() {});
   xit("detect attempts to nest expectations", async function() {});
 });

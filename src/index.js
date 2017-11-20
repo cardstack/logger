@@ -1,4 +1,5 @@
 const tty = require('tty');
+const assert = require('assert');
 
 const color = require('./color');
 const Logger = require('./logger');
@@ -35,6 +36,11 @@ function assertAllowedLog(instance, levelIndex, formatArgs) {
   let message = instance.formatMessage(formatArgs);
   if (level === expect.level && expect.pattern.test(message)) {
     expect.matches++;
+  } else if (!expect.allowed.includes(level)) {
+    // Passing instance[level] in here removes it and everything lower from the stack trace.
+    // This means the first line of the stack will be the user function that attempted the
+    // disallowed log
+    assert.fail(null, null, `An unexpected ${level} was logged:\n${message}`, null, instance[level]);
   }
 }
 
@@ -86,7 +92,8 @@ for (let i in levels.slice(0, -1)) {
     let expectation = {
       level,
       pattern,
-      matches: 0
+      matches: 0,
+      allowed: options.allowed || ['trace', 'debug', 'info']
     };
     createLogger.expectation = expectation;
     try {
