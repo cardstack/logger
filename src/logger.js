@@ -11,11 +11,13 @@ class Logger {
       color,
       formatters,
       interactive,
-      log
+      log,
+      timestamps
     } = config;
     this.color = color;
     this.formatters = formatters;
     this.interactive = interactive;
+    this.timestamps = timestamps;
     this._log = log;
     this._lastTimestamp = new Date();
   }
@@ -41,9 +43,15 @@ class Logger {
     };
     if (this.interactive) {
       opts.color = this.color;
-      opts.diff = now - prev;
-    } else {
-      opts.timestamp = now;
+    }
+
+    if (this.timestamps) {
+      // dates are diffs for interactive, timestamps for non-tty
+      if (this.interactive) {
+        opts.diff = now - prev;
+      } else {
+        opts.timestamp = now;
+      }
     }
 
     let message = formatMessage(Array.from(arguments), this.name, opts);

@@ -123,6 +123,9 @@ variables. This overrides application defaults set with `configure`.
 DEFAULT_LOG_LEVEL=warn LOG_LEVELS='cardstack:*=info,noisy-module=trace' node app.js
 ```
 
+You can also turn off the timestamping (ms diffs or absolute timestamps,
+depending on whether it's going to a tty) with `LOG_TIMESTAMPS=false`
+
 ### `registerFormatter`
 To add a `%`-style formatter to use in your log messages, use the
 `registerFormatter` method. Trying to register a second formatter for

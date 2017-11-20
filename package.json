@@ -7,7 +7,7 @@
   },
   "description": "Library and application logging utility",
   "scripts": {
-    "test": "./test/test.sh"
+    "test": "mocha test/spec"
   },
   "keywords": [
     "debug",
