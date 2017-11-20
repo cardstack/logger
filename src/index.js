@@ -87,6 +87,10 @@ for (let i in levels.slice(0, -1)) {
       options = {};
     }
 
+    if (createLogger.expectation) {
+      throw new Error("Unfortunately, nested expectations are not supported. If you feel they are important, please file an issue");
+    }
+
     let count = options.count || 1;
 
     let expectation = {

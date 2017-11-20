@@ -60,5 +60,15 @@ describe("Logger expectations", function() {
     });
   });
 
-  xit("detect attempts to nest expectations", async function() {});
+  it("detect attempts to nest expectations", async function() {
+    try {
+      await logger.expectInfo(/message/, async function() {
+        await logger.expectWarn(/warning/, function() {});
+      });
+    } catch (e) {
+      assert.equal(e.message, "Unfortunately, nested expectations are not supported. If you feel they are important, please file an issue");
+      return;
+    }
+    assert.fail("Nested expectations should fail");
+  });
 });
