@@ -1,8 +1,12 @@
 # @cardstack/logger
 
-A fork of tj's [`debug`](https://github.com/visionmedia/debug), modified
-to add log levels, and better global configuration support. This readme
-only documents the differences.
+The logging library used by the Cardstack Hub and official plugins.
+Per-channel logging level support, graceful co-operation and
+configuration sharing between multiple loaded instances (even
+across versions), and first-class test assertion support.
+
+Inspiration (and a little code) taken from tj's
+[`debug`](https://github.com/visionmedia/debug).
 
 ## Installation
 
@@ -12,24 +16,8 @@ $ npm install @cardstack/logger
 
 ## Browser support
 
-We're focused on node logging, and temporarily removing browser logging.
-We will likely add it back in.
-
-## Application-level (global) config
-
-It's possible for multiple versions of a library to be loaded by
-different dependent modules. While usually this causes no issues,
-for something like a logger it's best to be able to configure it in
-once place, and have multiple versions co-operate and share this
-configuration.
-
-So, the first loaded instance of `@cardstack/logger` "wins", and
-registers itself to be used globally. Other instances loaded later will
-delegate to that global logger.
-
-This configuation is done via the [`configure()`](#configure) and
-[`registerFormatter()`](#registerformatter) methods on the module
-instance.
+We're focused on node.js logging, though we may add browser support in
+the future.
 
 ## Log levels
 
@@ -49,19 +37,23 @@ certain channels at runtime.
   debugging.
 - `trace` - Dense, noisy information only useful when digging deeply
   into a system.
-- `log` - For when you don't want to decide. These messages are _always_
-  displayed, so should be used during active development only. It's a
-  separate logging level so as to be easy to search for or detect with
-  linters. 
+- `log` - A convenience for active development. These messages are _always_
+  displayed regardless of configuration, and aren't considered by the
+  expectation system.
 
-```
-let log = require('@cardstack/logger')('channel-name');
+## Logging usage
 
-log.log("ok, the crash isn't coming from the require step");
+The main export of `@cardstack/logger` is a function which creates
+namespaced loggers. These loggers have a method for each logging level:
+
+```js
+let log = require('@cardstack/logger')('my-module:subsystem');
+
+log.log("ok, this file is actually required at least");
 
 log.info('Application starting');
-if (!GlobalCache) {
-  log.warn('The GlobalCache module hasn't been loaded. The application may run slower than expected');
+if (typeof GlobalCache === 'undefined') {
+  log.warn("The GlobalCache module hasn't been loaded. The application may run slower than expected");
 }
 
 try {
@@ -83,86 +75,90 @@ setInterval(function() {
 }, 50);
 ```
 
-You can configure logging-levels per-channel, as well as specify the
-default logging level for unconfigured channels.
+## Application and run-time configuration
 
-When you specify a logging level, messages of that level and higher are
-shown. `trace` is the lowest level, and `error` is the highest. You can
-also specify `none` to silence all messages.
+You can specify default logging levels for channels in your
+application's entry point. Try to do this as early as you can, before
+requiring other modules, to avoid messages being logged before you set
+the configuration.
 
-If you don't specify a default logging level, `info` is used.
+When you set a logging level, all messages of that level and higher will
+be displayed (lowest is `trace`, and highest is `error`). You can also
+set the level to `none` to suppress all messages.
+
+The default logging level is `info`.
+
+Even if multiple versions are installed via different dependencies, we
+take care to co-ordinate and make sure this configuration is applied to
+all of them. 
 
 If multiple patterns match a channel, the last-specified one will apply.
 
-Application default logging levels are set via the [`configure`
-method](#configure), or set at runtime via [environment
-variables](#environment-variables)
+Note - this should only be done in an _application_. If you're shipping
+a library to be consumed by others, you should _not_ call this function -
+you should leave users to decide it at the application level.
 
-## Docs
+```js
+// app.js
+const logger = require('@cardstack/logger');
+const dep = require('dependency');
 
-### `configure`
-Use the `configure` method on the module instance to set
-application-level defaults. Library authors should _not_ call this
-method.
-
-```
-require('@cardstack/logger').configure({
+logger.configure({
   defaultLevel: 'warn',
   logLevels: [
-    ['cardstack:*', 'info'],
-    ['noisy-module', 'error']
+    ['app:*', 'info'], // Our info messages are all pretty useful
+    ['dependency', 'error'] // This lib spams warnings that aren't actually important
   ]
 });
+
+let log = logger('app:index');
+log.info('starting up');
+
+if (dep.shouldRun()) {
+  log.debug('running dependency');
+  dep.fn();
+}
+
+log.info('all done');
 ```
 
-### Environment variables
-Logging levels for a given application run can be set with environment
-variables. This overrides application defaults set with `configure`.
-
 ```
-DEFAULT_LOG_LEVEL=warn LOG_LEVELS='cardstack:*=info,noisy-module=trace' node app.js
+$ node app.js
+  app:index starting up
+  app:index all done
 ```
 
-You can also turn off the timestamping (ms diffs or absolute timestamps,
-depending on whether it's going to a tty) with `LOG_TIMESTAMPS=false`
-
-### `registerFormatter`
-To add a `%`-style formatter to use in your log messages, use the
-`registerFormatter` method. Trying to register a second formatter for
-the same letter will cause an error.
+You can then override these at runtime via environment variables:
 ```
-const logger = require('@cardstack/logger')
-// Display as hex
-logger.registerFormatter('x', function(val) {
-  return parseInt(val).toString(16);
+$ LOG_LEVELS='*=none,app:*=debug,dependency=warn' node app.js
+  app:index starting up
+  app:index running dependency
+  dependency Woah this isn't linux, don't you believe in free software?!
+  app:index all done
+```
+
+## Test expectations
+
+Error messages and logs are an important part of developer experience,
+and worth testing. So, we include expectation helpers to assert that
+certain log messages occur, and that unexpected ones don't. As a bonus,
+it's sometimes easier to test that a given log message occurs, than to
+inspect private state.
+
+There exists an `expect...` method on the logger module for each logging
+level. It accepts a regex to match against the message, an optional set
+of options, and a function to execute to trigger the expected logging.
+
+```js
+const logger = require('@cardstack/logger');
+let log = logger('test');
+// simple usage
+await logger.expectInfo(/message/, async function() {
+  await someAsyncSetup();
+  log.trace('ignored');
+  log.info('message');
 });
 
-logger('cardstack:example').info('%d is "%x" in hex', 51966, 51966);
-// 51966 is "cafe" in hex
+// advanced usage
+await logger.expectWarn(/whoops/, { count: 2, allowed: ['error']}, someFunctionThatLogsAnError);
 ```
-
-
-## License
-
-(The MIT License)
-
-Copyright (c) 2014-2017 TJ Holowaychuk &lt;tj@vision-media.ca&gt;
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
