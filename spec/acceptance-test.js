@@ -4,6 +4,8 @@ const {promisify} = require('util');
 const child_process = require('child_process');
 const exec = promisify(child_process.execFile);
 
+const appPath = path.join(__dirname, 'example', 'app.js');
+
 describe("Acceptance", function() {
   it("App defaults are applied", async function() {
     let expected = `dependency warn
@@ -21,7 +23,7 @@ cardstack:b error
 cardstack:b log
 `;
 
-    let {stderr} = await exec('node', [path.join(__dirname, '..', 'example.js')], {
+    let {stderr} = await exec('node', [appPath], {
       env: Object.assign({
         LOG_TIMESTAMPS: 'false'
       }, process.env)
@@ -45,7 +47,7 @@ cardstack:b error
 cardstack:b log
 `;
 
-    let {stderr} = await exec('node', [path.join(__dirname, '..', 'example.js')], {
+    let {stderr} = await exec('node', [appPath], {
       env: Object.assign({
         DEFAULT_LOG_LEVEL: 'error',
         LOG_LEVELS: 'whiny-dependency=none,cardstack:b=trace',

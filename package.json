@@ -7,7 +7,8 @@
   },
   "description": "Library and application logging utility",
   "scripts": {
-    "test": "mocha test/spec"
+    "test": "mocha spec",
+    "example": "node spec/example/app.js"
   },
   "keywords": [
     "debug",
