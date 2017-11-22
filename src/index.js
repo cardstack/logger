@@ -6,6 +6,11 @@ const Logger = require('./logger');
 const env = require('./environment');
 const patterns = require('./patterns');
 const levels = require('./levels');
+const {
+  addExpectMethods,
+  assertAllowedLog,
+  isExpecting
+} = require('./expectations');
 
 
 function createLogger(name) {
@@ -19,30 +24,6 @@ function createLogger(name) {
   return log;
 }
 
-function doLog(instance, levelIndex, formatArgs) {
-  if (levelIndex === levels.LOG) {
-    console.error(instance.formatMessage(formatArgs));
-  } else if (createLogger.expectation) {
-    assertAllowedLog(...arguments);
-  } else if (levelIndex >= instance._level) {
-    console.error(instance.formatMessage(formatArgs));
-  }
-}
-
-function assertAllowedLog(instance, levelIndex, formatArgs) {
-  let level = levels[levelIndex];
-  let expect = createLogger.expectation;
-  let message = instance.formatMessage(formatArgs);
-  if (level === expect.level && expect.pattern.test(message)) {
-    expect.matches++;
-  } else if (!expect.allowed.includes(level)) {
-    // Passing instance[level] in here removes it and everything lower from the stack trace.
-    // This means the first line of the stack will be the user function that attempted the
-    // disallowed log
-    assert.fail(null, null, `An unexpected ${level} was logged:\n${message}`, null, instance[level]);
-  }
-}
-
 createLogger.config = {
   defaultLevel: 'info',
   interactive: tty.isatty(process.stderr),
@@ -50,6 +31,23 @@ createLogger.config = {
   timestamps: process.env.LOG_TIMESTAMPS !== 'false'
 };
 createLogger.instances = [];
+
+function doLog(instance, levelIndex, formatArgs) {
+  // log.log always outputs, and has no other effect
+  if (levelIndex === levels.LOG) {
+    console.error(instance.formatMessage(formatArgs));
+  // we're in tests, because someone has called one of the log.expect... methods.
+  // Don't output the message, but do track that it was seen, and throw if it's
+  // unexpected.
+  } else if (isExpecting(createLogger)) {
+    assertAllowedLog(createLogger, ...arguments);
+  // the normal case. Output the message if the channel is configured to print
+  // messages of that importance.
+  } else if (levelIndex >= instance._level) {
+    console.error(instance.formatMessage(formatArgs));
+  }
+  // otherwise, do no work and output nothing
+}
 
 createLogger.configure = function(appConfig={}) {
   let overrides = env.parseEnv(process.env);
@@ -64,47 +62,7 @@ createLogger.configure = function(appConfig={}) {
   });
 }
 
-// adds expectWarn(), expectInfo(), etc.
-// we slice() so we don't add expectNone()
-for (let i in levels.slice(0, -1)) {
-  let level = levels[i];
-  createLogger['expect' + capitalize(level)] = async function(pattern, options, fn) {
-    // expectWarn(pattern, fn)
-    if (typeof options === 'function') {
-      fn = options;
-      options = {};
-    }
 
-    if (createLogger.expectation) {
-      throw new Error("Unfortunately, nested expectations are not supported. If you feel they are important, please file an issue");
-    }
-
-    let count = options.count || 1;
-
-    let expectation = {
-      level,
-      pattern,
-      matches: 0,
-      allowed: options.allowed || ['trace', 'debug', 'info']
-    };
-    createLogger.expectation = expectation;
-    try {
-    await fn();
-    } finally {
-      delete createLogger.expectation;
-    }
-    if (expectation.matches === 0) {
-      throw new Error(`Expected a log message to match ${pattern} but none did`);
-    } else if (expectation.matches !== count) {
-      throw new Error(`Wrong number of logs matching ${pattern}. Expected ${count}, got ${expectation.matches}`);
-    }
-  }
-}
-
-function capitalize(str) {
-  return str.slice(0,1).toUpperCase() + str.slice(1);
-}
-
+addExpectMethods(createLogger);
 createLogger.configure() // pull in the environment config, in case app doesn't configure
-
 module.exports = createLogger;
