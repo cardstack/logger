@@ -9,3 +9,12 @@ coverage
 # lockfiles
 yarn.lock
 package-lock.json
+
+# typescript build output
+# /src/**/*.js
+# /src/**/*.js.map
+# /src/**/*.d.ts
+# /spec/**/*.js
+# /spec/**/*.js.map
+# /spec/**/*.d.ts
+

@@ -7,6 +7,9 @@
   },
   "description": "Library and application logging utility",
   "scripts": {
+    "compile": "tsc",
+    "clean": "git clean -x -f",
+    "prepare": "tsc",
     "test": "mocha spec",
     "example": "node spec/example/app.js"
   },
@@ -19,10 +22,14 @@
   "contributors": [],
   "license": "MIT",
   "dependencies": {
+    "@types/ms": "^0.7.30",
+    "@types/node": "^11.13.8",
     "ms": "2.0.0"
   },
   "devDependencies": {
-    "mocha": "^3.2.0"
+    "@types/mocha": "^5.2.6",
+    "mocha": "^3.2.0",
+    "typescript": "^3.4.5"
   },
   "main": "./src/index.js"
 }
