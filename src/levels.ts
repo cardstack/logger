@@ -1,2 +1,4 @@
-module.exports = ['trace', 'debug', 'info', 'warn', 'error', 'none'];
-module.exports.LOG = Symbol('log.log');
+const levels = ['trace', 'debug', 'info', 'warn', 'error', 'none'] as string[] & { LOG: Symbol };
+levels.LOG = Symbol('log.log');
+export = levels;
+
