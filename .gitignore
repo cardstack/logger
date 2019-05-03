@@ -27,3 +27,6 @@ package-lock.json
 /src/format.js
 /src/format.js.map
 /src/format.d.ts
+/src/patterns.js
+/src/patterns.js.map
+/src/patterns.d.ts
