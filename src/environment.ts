@@ -1,11 +1,14 @@
-function parseLevelList(str) {
+export function parseLevelList(str: string) {
   return str.split(',').map(function(pair) {
     return pair.split('=');
   });
 };
 
-function parseEnv(env) {
-  let result = {
+export function parseEnv(env: typeof process.env) {
+  let result: {
+    logLevels: string[][];
+    defaultLevel?: string;
+  } = {
     logLevels: []
   };
   if (env.DEFAULT_LOG_LEVEL) {
@@ -19,7 +22,3 @@ function parseEnv(env) {
   return result;
 }
 
-module.exports = {
-  parseLevelList,
-  parseEnv
-};
