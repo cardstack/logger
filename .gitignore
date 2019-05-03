@@ -30,3 +30,6 @@ package-lock.json
 /src/patterns.js
 /src/patterns.js.map
 /src/patterns.d.ts
+/src/levels.js
+/src/levels.js.map
+/src/levels.d.ts
