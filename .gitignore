@@ -24,3 +24,6 @@ package-lock.json
 /src/environment.js
 /src/environment.js.map
 /src/environment.d.ts
+/src/format.js
+/src/format.js.map
+/src/format.d.ts
