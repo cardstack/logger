@@ -21,3 +21,6 @@ package-lock.json
 /src/color.js
 /src/color.js.map
 /src/color.d.ts
+/src/environment.js
+/src/environment.js.map
+/src/environment.d.ts
