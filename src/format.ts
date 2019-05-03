@@ -1,24 +1,28 @@
 const util = require('util');
 const humanize = require('ms');
 
-function ansiColor(text, color, {bold}={}) {
-  if (color < 8) {
-    color = '3' + color;
+export function color(text: string, colorVal: string, {bold}: { bold?: boolean } = {}) {
+  if (colorVal < "8") {
+    colorVal = '3' + colorVal;
   } else {
-    color = '38;5;' + color;
+    colorVal = '38;5;' + colorVal;
   }
   if (bold) {
-    color = '1;'+color;
+    colorVal = '1;'+colorVal;
   }
-  return `\u001b[${color}m${text}\u001b[0m`;
+  return `\u001b[${colorVal}m${text}\u001b[0m`;
 };
 
-function prefixLines(prefix, text) {
+export function prefixLines(prefix: string, text: string) {
   return text.split('\n').map(line => prefix + line).join('\n');
 };
 
-function runFormatters(args, formatters) {
-  let result = args.slice();
+interface Formatters {
+  [letter: string]: (value: any) => string;
+}
+
+export function runFormatters(args: [string, any], formatters: Formatters) {
+  let result = args.slice() as [string, any];
   let str = result[0];
   let index = 0;
   result[0] = str.replace(/%([a-zA-Z])/g, function(match, letter) {
@@ -33,9 +37,17 @@ function runFormatters(args, formatters) {
   return result;
 };
 
-function formatMessage(args, channel, options={}) {
+interface FormatOptions {
+  color?: string;
+  diff?: number;
+  formatters?: Formatters;
+  interactive?: boolean;
+  timestamp?: Date;
+}
+
+export function formatMessage(args: [string, any], channel: string, options: FormatOptions={}) {
   let {
-    color,
+    color: colorVal,
     diff,
     formatters,
     interactive,
@@ -49,8 +61,8 @@ function formatMessage(args, channel, options={}) {
   // run builtin formatters
   let text = util.format(...args);
 
-  if (color) {
-    channel = ansiColor(channel, color, {bold:true});
+  if (colorVal) {
+    channel = color(channel, colorVal, {bold:true});
   }
 
   // Always prefixed with the channel name.
@@ -68,8 +80,8 @@ function formatMessage(args, channel, options={}) {
   let suffix = '';
   if (diff != null) {
     suffix = '+' + humanize(diff);
-    if (color) {
-      suffix = ansiColor(suffix, color);
+    if (colorVal) {
+      suffix = color(suffix, colorVal);
     }
     suffix = ' ' + suffix
   }
@@ -85,9 +97,3 @@ function formatMessage(args, channel, options={}) {
   }
 };
 
-module.exports = {
-  color: ansiColor,
-  prefixLines,
-  runFormatters,
-  formatMessage
-};
