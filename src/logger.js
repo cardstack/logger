@@ -1,5 +1,6 @@
 const format = require('./format');
-const levels = require('./levels');
+const levels = require('./levels').default;
+const LOG = require('./levels').LOG;
 
 class Logger {
   constructor(name, level, config={}) {
@@ -62,7 +63,7 @@ class Logger {
 
   // log.log always outputs, for development stuff only
   log(...formatArgs) {
-    this._log(this, levels.LOG, formatArgs);
+    this._log(this, LOG, formatArgs);
   }
 };
 

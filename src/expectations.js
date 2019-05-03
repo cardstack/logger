@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-const levels = require('./levels');
+const levels = require('./levels').default;
 
 function isExpecting(logModule) {
   return !!logModule.expectation;

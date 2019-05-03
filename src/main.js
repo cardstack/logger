@@ -5,7 +5,8 @@ const color = require('./color');
 const Logger = require('./logger');
 const env = require('./environment');
 const patterns = require('./patterns');
-const levels = require('./levels');
+const levels = require('./levels').default;
+const LOG = require('./levels').LOG;
 const {
   addExpectMethods,
   assertAllowedLog,
@@ -34,7 +35,7 @@ createLogger.instances = [];
 
 function doLog(instance, levelIndex, formatArgs) {
   // log.log always outputs, and has no other effect
-  if (levelIndex === levels.LOG) {
+  if (levelIndex === LOG) {
     console.error(instance.formatMessage(formatArgs));
   // we're in tests, because someone has called one of the log.expect... methods.
   // Don't output the message, but do track that it was seen, and throw if it's
