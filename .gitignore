@@ -24,3 +24,6 @@ package-lock.json
 /spec/environment-test.js
 /spec/environment-test.js.map
 /spec/environment-test.d.ts
+/spec/expect-test.js
+/spec/expect-test.js.map
+/spec/expect-test.d.ts
