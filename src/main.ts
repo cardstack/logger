@@ -6,6 +6,7 @@ import Logger, { Level } from './logger';
 import { parseEnv } from './environment';
 import { findMatch, compile } from './patterns';
 import { expect, ExpectOptions, ExpectCallback } from './expectations';
+import compatibility from './compatibility';
 
 function createLogger(name: string) {
   let level = findMatch(createLogger.config.logLevels, name, createLogger.config.defaultLevel);
@@ -16,6 +17,8 @@ function createLogger(name: string) {
   createLogger.instances.push(log);
   return log;
 }
+
+export type CreateLogger = typeof createLogger;
 
 createLogger.config = {
   defaultLevel: 'info' as Level,
@@ -59,7 +62,7 @@ let expectationMethods = {
 Object.assign(createLogger, expectationMethods);
 
 createLogger.configure() // pull in the environment config, in case app doesn't configure
-module.exports = createLogger;
+export default createLogger;
 
 // at the end, so as to be careful about a cyclical dependency.
-createLogger.getAPIWrapper = require('./compatibility');
+createLogger.getAPIWrapper = compatibility;
