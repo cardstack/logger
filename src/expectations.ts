@@ -13,6 +13,10 @@ export function isExpecting() {
 }
 
 export function assertAllowedLog(instance: Logger, level: Level, formatArgs: [string, any]) {
+  if (level === 'none') {
+    throw new Error("You can't expectNone");
+  }
+
   if (!expectation) {
     return false;
   }

@@ -6,6 +6,7 @@ const levelsObj = {
   info: true,
   warn: true,
   error: true,
+  none: true,
 };
 
 const levels = Object.keys(levelsObj);
