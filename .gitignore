@@ -39,3 +39,6 @@ package-lock.json
 /src/expectations.js
 /src/expectations.js.map
 /src/expectations.d.ts
+/src/main.js
+/src/main.js.map
+/src/main.d.ts
