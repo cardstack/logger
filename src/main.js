@@ -6,7 +6,7 @@ const Logger = require('./logger');
 const env = require('./environment');
 const patterns = require('./patterns');
 const levels = require('./levels').default;
-const LOG = require('./levels').LOG;
+
 const {
   addExpectMethods,
   assertAllowedLog,
