@@ -1,23 +1,16 @@
-const tty = require('tty');
-const assert = require('assert');
+import tty from 'tty';
+import assert from 'assert';
 
-const color = require('./color');
-const Logger = require('./logger').default;
-const env = require('./environment');
-const patterns = require('./patterns');
-const { expect } = require('./expectations');
+import { choose as chooseColor } from './color';
+import Logger, { Level } from './logger';
+import { parseEnv } from './environment';
+import { findMatch, compile } from './patterns';
+import { expect, ExpectOptions, ExpectCallback } from './expectations';
 
-const {
-  addExpectMethods,
-  assertAllowedLog,
-  isExpecting
-} = require('./expectations');
-
-
-function createLogger(name) {
-  let level = patterns.findMatch(createLogger.config.logLevels, name, createLogger.config.defaultLevel);
+function createLogger(name: string) {
+  let level = findMatch(createLogger.config.logLevels, name, createLogger.config.defaultLevel);
   let log = new Logger(name, level, {
-    color: color.choose(name),
+    color: chooseColor(name),
     interactive: createLogger.config.interactive
   });
   createLogger.instances.push(log);
@@ -25,40 +18,40 @@ function createLogger(name) {
 }
 
 createLogger.config = {
-  defaultLevel: 'info',
-  interactive: tty.isatty(process.stderr),
-  logLevels: [],
+  defaultLevel: 'info' as Level,
+  interactive: tty.isatty(2), // STDERR is always file descriptor 2
+  logLevels: [] as ([RegExp, Level])[],
   timestamps: process.env.LOG_TIMESTAMPS !== 'false'
 };
-createLogger.instances = [];
+createLogger.instances = [] as Logger[];
 
-createLogger.configure = function(appConfig={}) {
-  let overrides = env.parseEnv(process.env);
+createLogger.configure = function(appConfig: { defaultLevel?: Level, logLevels?: ([string, Level])[] } = {}) {
+  let overrides = parseEnv(process.env);
 
   createLogger.config.defaultLevel = overrides.defaultLevel || appConfig.defaultLevel || 'info';
 
   let logLevels = (appConfig.logLevels || []).concat(overrides.logLevels);
-  createLogger.config.logLevels = logLevels.map(([pattern, level]) => [patterns.compile(pattern), level]);
+  createLogger.config.logLevels = logLevels.map(([pattern, level]) => [compile(pattern), level]);
 
   createLogger.instances.forEach(function(log) {
-    log.level = patterns.findMatch(createLogger.config.logLevels, log.name, createLogger.config.defaultLevel);
+    log.level = findMatch(createLogger.config.logLevels, log.name, createLogger.config.defaultLevel);
   });
 }
 
 let expectationMethods = {
-  expectTrace(pattern, options, fn) {
+  expectTrace(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
     return expect('trace', pattern, options, fn);
   },
-  expectDebug(pattern, options, fn) {
+  expectDebug(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
     return expect('debug', pattern, options, fn);
   },
-  expectInfo(pattern, options, fn) {
+  expectInfo(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
     return expect('info', pattern, options, fn);
   },
-  expectWarn(pattern, options, fn) {
+  expectWarn(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
     return expect('warn', pattern, options, fn);
   },
-  expectError(pattern, options, fn) {
+  expectError(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
     return expect('error', pattern, options, fn);
   }
 };

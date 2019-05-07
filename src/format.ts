@@ -1,16 +1,17 @@
 const util = require('util');
 const humanize = require('ms');
 
-export function color(text: string, colorVal: string, {bold}: { bold?: boolean } = {}) {
-  if (colorVal < "8") {
-    colorVal = '3' + colorVal;
+export function color(text: string, colorVal: number, {bold}: { bold?: boolean } = {}) {
+  let colorString: string;
+  if (colorVal < 8) {
+    colorString = '3' + colorVal;
   } else {
-    colorVal = '38;5;' + colorVal;
+    colorString = '38;5;' + colorVal;
   }
   if (bold) {
-    colorVal = '1;'+colorVal;
+    colorString = '1;'+colorString;
   }
-  return `\u001b[${colorVal}m${text}\u001b[0m`;
+  return `\u001b[${colorString}m${text}\u001b[0m`;
 };
 
 export function prefixLines(prefix: string, text: string) {
@@ -38,7 +39,7 @@ export function runFormatters(args: [string, any], formatters: Formatters) {
 };
 
 export interface FormatOptions {
-  color?: string;
+  color?: number;
   diff?: number;
   formatters?: Formatters;
   interactive?: boolean;

@@ -28,18 +28,18 @@ export function assertAllowedLog(instance: Logger, level: Level, formatArgs: [st
   return true;
 }
 
-interface ExpectOptions {
+export interface ExpectOptions {
   count?: number;
   allowed?: string[];
 }
 
-type callback = () => void | Promise<void>;
+export type ExpectCallback = () => void | Promise<void>;
 
-export async function expect(level: Level, pattern: RegExp, fn: callback): Promise<void>
-export async function expect(level: Level, pattern: RegExp, options: ExpectOptions, fn: callback): Promise<void>
-export async function expect(level: Level, pattern: RegExp, maybeOptions: ExpectOptions | callback, maybeFn?: callback): Promise<void> {
+export async function expect(level: Level, pattern: RegExp, fn: ExpectCallback): Promise<void>
+export async function expect(level: Level, pattern: RegExp, options: ExpectOptions, fn: ExpectCallback): Promise<void>
+export async function expect(level: Level, pattern: RegExp, maybeOptions: ExpectOptions | ExpectCallback, maybeFn?: ExpectCallback): Promise<void> {
 
-  let fn: callback;
+  let fn: ExpectCallback;
   let options: ExpectOptions;
 
   if (typeof maybeOptions === 'function') {

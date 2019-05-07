@@ -18,7 +18,7 @@ import {
 } from './expectations';
 
 interface Options {
-  color?: string;
+  color?: number;
   interactive?: boolean;
   timestamps?: boolean;
 }
@@ -31,7 +31,7 @@ export default class Logger {
   private _lastTimestamp: Date = new Date();
   private _level: number;
 
-  constructor(private name: string, level: Level, config: Options={}) {
+  constructor(public name: string, level: Level, config: Options={}) {
     let {
       color,
       interactive,
@@ -60,6 +60,10 @@ export default class Logger {
       throw new Error(`A formatter for "${letter}" has already been registered`);
     }
     this.formatters[letter] = formatter;
+  }
+
+  set level(level: Level) {
+    this._level = levels.indexOf(level);
   }
 
   formatMessage(formatArgs: [string, any]) {
