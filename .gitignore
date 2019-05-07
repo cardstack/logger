@@ -17,3 +17,7 @@ package-lock.json
 # /spec/**/*.js
 # /spec/**/*.js.map
 # /spec/**/*.d.ts
+
+/spec/acceptance-test.js
+/spec/acceptance-test.js.map
+/spec/acceptance-test.d.ts
