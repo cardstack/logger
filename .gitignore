@@ -11,34 +11,9 @@ yarn.lock
 package-lock.json
 
 # typescript build output
-# /src/**/*.js
-# /src/**/*.js.map
-# /src/**/*.d.ts
+/src/**/*.js
+/src/**/*.js.map
+/src/**/*.d.ts
 # /spec/**/*.js
 # /spec/**/*.js.map
 # /spec/**/*.d.ts
-
-/src/color.js
-/src/color.js.map
-/src/color.d.ts
-/src/environment.js
-/src/environment.js.map
-/src/environment.d.ts
-/src/format.js
-/src/format.js.map
-/src/format.d.ts
-/src/patterns.js
-/src/patterns.js.map
-/src/patterns.d.ts
-/src/levels.js
-/src/levels.js.map
-/src/levels.d.ts
-/src/logger.js
-/src/logger.js.map
-/src/logger.d.ts
-/src/expectations.js
-/src/expectations.js.map
-/src/expectations.d.ts
-/src/main.js
-/src/main.js.map
-/src/main.d.ts
