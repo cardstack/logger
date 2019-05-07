@@ -1,6 +1,10 @@
 const format = require('./format');
 const levels = require('./levels').default;
 const LOG = require('./levels').LOG;
+const {
+  assertAllowedLog,
+  isExpecting
+} = require('./expectations');
 
 class Logger {
   constructor(name, level, config={}) {
@@ -11,17 +15,30 @@ class Logger {
     let {
       color,
       interactive,
-      log,
       timestamps
     } = config;
     this.color = color;
     this.interactive = interactive;
     this.timestamps = timestamps;
     this._lastTimestamp = new Date();
-    // This will determine whether to actually output the message, and will
-    // call our formatMessage() if necessary. We push the logic out there to
-    // preserve performance while enabling the fancy expectWarn assertions.
-    this._log = log;
+
+  }
+
+  _log(levelIndex, formatArgs) {
+    // log.log always outputs, and has no other effect
+    if (levelIndex === LOG) {
+      console.error(this.formatMessage(formatArgs));
+    // we're in tests, because someone has called one of the log.expect... methods.
+    // Don't output the message, but do track that it was seen, and throw if it's
+    // unexpected.
+    } else if (isExpecting()) {
+      assertAllowedLog(this, levelIndex, formatArgs);
+    // the normal case. Output the message if the channel is configured to print
+    // messages of that importance.
+    } else if (levelIndex >= this._level) {
+      console.error(this.formatMessage(formatArgs));
+    }
+    // otherwise, do no work and output nothing
   }
 
   // accepts string for easy translation from config
@@ -63,7 +80,7 @@ class Logger {
 
   // log.log always outputs, for development stuff only
   log(...formatArgs) {
-    this._log(this, LOG, formatArgs);
+    this._log(LOG, formatArgs);
   }
 };
 
@@ -71,7 +88,7 @@ class Logger {
 // we slice() so we don't add a "none" method
 for (let i in levels.slice(0, -1)) {
   Logger.prototype[levels[i]] = function(...formatArgs) {
-    this._log(this, i, formatArgs);
+    this._log(i, formatArgs);
   }
 }
 

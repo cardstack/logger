@@ -2,12 +2,13 @@ const assert = require('assert');
 
 const levels = require('./levels').default;
 
-function isExpecting(logModule) {
-  return !!logModule.expectation;
+let expectation = null;
+
+function isExpecting() {
+  return !!expectation;
 }
 
-function assertAllowedLog(logModule, instance, levelIndex, formatArgs) {
-  let {expectation} = logModule;
+function assertAllowedLog(instance, levelIndex, formatArgs) {
   let level = levels[levelIndex];
   let message = instance.formatMessage(formatArgs);
   if (level === expectation.level && expectation.pattern.test(message)) {
@@ -32,28 +33,28 @@ function addExpectMethods(createLogger) {
         options = {};
       }
 
-      if (createLogger.expectation) {
+      if (expectation) {
         throw new Error("Unfortunately, nested expectations are not supported. If you feel they are important, please file an issue");
       }
 
       let count = options.count || 1;
 
-      let expectation = {
+      let ourExpectation = {
         level,
         pattern,
         matches: 0,
         allowed: options.allowed || ['trace', 'debug', 'info']
       };
-      createLogger.expectation = expectation;
+      expectation = ourExpectation;
       try {
-      await fn();
+        await fn();
       } finally {
-        delete createLogger.expectation;
+        expectation = null;
       }
-      if (expectation.matches === 0) {
+      if (ourExpectation.matches === 0) {
         throw new Error(`Expected a log message to match ${pattern} but none did`);
-      } else if (expectation.matches !== count) {
-        throw new Error(`Wrong number of logs matching ${pattern}. Expected ${count}, got ${expectation.matches}`);
+      } else if (ourExpectation.matches !== count) {
+        throw new Error(`Wrong number of logs matching ${pattern}. Expected ${count}, got ${ourExpectation.matches}`);
       }
     }
   }
