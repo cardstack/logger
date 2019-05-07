@@ -36,3 +36,6 @@ package-lock.json
 /src/logger.js
 /src/logger.js.map
 /src/logger.d.ts
+/src/expectations.js
+/src/expectations.js.map
+/src/expectations.d.ts
