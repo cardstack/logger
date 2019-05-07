@@ -21,3 +21,6 @@ package-lock.json
 /spec/acceptance-test.js
 /spec/acceptance-test.js.map
 /spec/acceptance-test.d.ts
+/spec/environment-test.js
+/spec/environment-test.js.map
+/spec/environment-test.d.ts
