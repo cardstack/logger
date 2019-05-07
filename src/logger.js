@@ -1,6 +1,6 @@
 const format = require('./format');
 const levels = require('./levels').default;
-const LOG = require('./levels').LOG;
+
 const {
   assertAllowedLog,
   isExpecting
@@ -25,13 +25,10 @@ class Logger {
   }
 
   _log(levelIndex, formatArgs) {
-    // log.log always outputs, and has no other effect
-    if (levelIndex === LOG) {
-      console.error(this.formatMessage(formatArgs));
     // we're in tests, because someone has called one of the log.expect... methods.
     // Don't output the message, but do track that it was seen, and throw if it's
     // unexpected.
-    } else if (isExpecting()) {
+    if (isExpecting()) {
       assertAllowedLog(this, levelIndex, formatArgs);
     // the normal case. Output the message if the channel is configured to print
     // messages of that importance.
@@ -80,7 +77,7 @@ class Logger {
 
   // log.log always outputs, for development stuff only
   log(...formatArgs) {
-    this._log(LOG, formatArgs);
+    console.error(this.formatMessage(formatArgs));
   }
 };
 
