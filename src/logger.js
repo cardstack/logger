@@ -79,14 +79,12 @@ class Logger {
   log(...formatArgs) {
     console.error(this.formatMessage(formatArgs));
   }
-};
 
-// adds log.trace, log.debug, etc.
-// we slice() so we don't add a "none" method
-for (let i in levels.slice(0, -1)) {
-  Logger.prototype[levels[i]] = function(...formatArgs) {
-    this._log(i, formatArgs);
-  }
-}
+  trace(...formatArgs) { this._log(0, formatArgs); }
+  debug(...formatArgs) { this._log(1, formatArgs); }
+  info(...formatArgs) { this._log(2, formatArgs); }
+  warn(...formatArgs) { this._log(3, formatArgs); }
+  error(...formatArgs) { this._log(4, formatArgs); }
+};
 
 module.exports = Logger;
