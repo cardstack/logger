@@ -1,5 +1,5 @@
 const format = require('./format');
-const levels = require('./levels').default;
+const levels = ['trace', 'debug', 'info', 'warn', 'error', 'none'];
 
 const {
   assertAllowedLog,
@@ -24,15 +24,15 @@ class Logger {
 
   }
 
-  _log(levelIndex, formatArgs) {
+  _log(level, formatArgs) {
     // we're in tests, because someone has called one of the log.expect... methods.
     // Don't output the message, but do track that it was seen, and throw if it's
     // unexpected.
     if (isExpecting()) {
-      assertAllowedLog(this, levelIndex, formatArgs);
+      assertAllowedLog(this, level, formatArgs);
     // the normal case. Output the message if the channel is configured to print
     // messages of that importance.
-    } else if (levelIndex >= this._level) {
+    } else if (levels.indexOf(level) >= this._level) {
       console.error(this.formatMessage(formatArgs));
     }
     // otherwise, do no work and output nothing
@@ -80,11 +80,11 @@ class Logger {
     console.error(this.formatMessage(formatArgs));
   }
 
-  trace(...formatArgs) { this._log(0, formatArgs); }
-  debug(...formatArgs) { this._log(1, formatArgs); }
-  info(...formatArgs) { this._log(2, formatArgs); }
-  warn(...formatArgs) { this._log(3, formatArgs); }
-  error(...formatArgs) { this._log(4, formatArgs); }
+  trace(...formatArgs) { this._log('trace', formatArgs); }
+  debug(...formatArgs) { this._log('debug', formatArgs); }
+  info(...formatArgs) { this._log('info', formatArgs); }
+  warn(...formatArgs) { this._log('warn', formatArgs); }
+  error(...formatArgs) { this._log('error', formatArgs); }
 };
 
 module.exports = Logger;

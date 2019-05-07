@@ -1,15 +1,12 @@
 const assert = require('assert');
 
-const levels = require('./levels').default;
-
 let expectation = null;
 
 function isExpecting() {
   return !!expectation;
 }
 
-function assertAllowedLog(instance, levelIndex, formatArgs) {
-  let level = levels[levelIndex];
+function assertAllowedLog(instance, level, formatArgs) {
   let message = instance.formatMessage(formatArgs);
   if (level === expectation.level && expectation.pattern.test(message)) {
     expectation.matches++;
@@ -20,43 +17,34 @@ function assertAllowedLog(instance, levelIndex, formatArgs) {
     assert.fail(null, null, `An unexpected ${level} was logged:\n${message}`, null, instance[level]);
   }
 }
+async function expect(level, pattern, options, fn) {
+  if (typeof options === 'function') {
+    fn = options;
+    options = {};
+  }
 
-function addExpectMethods(createLogger) {
-  // adds expectWarn(), expectInfo(), etc.
-  // we slice() so we don't add expectNone()
-  for (let i in levels.slice(0, -1)) {
-    let level = levels[i];
-    createLogger['expect' + capitalize(level)] = async function(pattern, options, fn) {
-      // expectWarn(pattern, fn)
-      if (typeof options === 'function') {
-        fn = options;
-        options = {};
-      }
+  if (expectation) {
+    throw new Error("Unfortunately, nested expectations are not supported. If you feel they are important, please file an issue");
+  }
 
-      if (expectation) {
-        throw new Error("Unfortunately, nested expectations are not supported. If you feel they are important, please file an issue");
-      }
+  let count = options.count || 1;
 
-      let count = options.count || 1;
-
-      let ourExpectation = {
-        level,
-        pattern,
-        matches: 0,
-        allowed: options.allowed || ['trace', 'debug', 'info']
-      };
-      expectation = ourExpectation;
-      try {
-        await fn();
-      } finally {
-        expectation = null;
-      }
-      if (ourExpectation.matches === 0) {
-        throw new Error(`Expected a log message to match ${pattern} but none did`);
-      } else if (ourExpectation.matches !== count) {
-        throw new Error(`Wrong number of logs matching ${pattern}. Expected ${count}, got ${ourExpectation.matches}`);
-      }
-    }
+  let ourExpectation = {
+    level,
+    pattern,
+    matches: 0,
+    allowed: options.allowed || ['trace', 'debug', 'info']
+  };
+  expectation = ourExpectation;
+  try {
+    await fn();
+  } finally {
+    expectation = null;
+  }
+  if (ourExpectation.matches === 0) {
+    throw new Error(`Expected a log message to match ${pattern} but none did`);
+  } else if (ourExpectation.matches !== count) {
+    throw new Error(`Wrong number of logs matching ${pattern}. Expected ${count}, got ${ourExpectation.matches}`);
   }
 }
 
@@ -65,7 +53,7 @@ function capitalize(str) {
 }
 
 module.exports = {
-  addExpectMethods,
+  expect,
   assertAllowedLog,
   isExpecting
 }

@@ -5,6 +5,7 @@ const color = require('./color');
 const Logger = require('./logger');
 const env = require('./environment');
 const patterns = require('./patterns');
+const { expect } = require('./expectations');
 
 const {
   addExpectMethods,
@@ -44,8 +45,26 @@ createLogger.configure = function(appConfig={}) {
   });
 }
 
+let expectationMethods = {
+  expectTrace(pattern, options, fn) {
+    return expect('trace', pattern, options, fn);
+  },
+  expectDebug(pattern, options, fn) {
+    return expect('debug', pattern, options, fn);
+  },
+  expectInfo(pattern, options, fn) {
+    return expect('info', pattern, options, fn);
+  },
+  expectWarn(pattern, options, fn) {
+    return expect('warn', pattern, options, fn);
+  },
+  expectError(pattern, options, fn) {
+    return expect('error', pattern, options, fn);
+  }
+};
 
-addExpectMethods(createLogger);
+Object.assign(createLogger, expectationMethods);
+
 createLogger.configure() // pull in the environment config, in case app doesn't configure
 module.exports = createLogger;
 
