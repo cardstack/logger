@@ -2,7 +2,7 @@ const tty = require('tty');
 const assert = require('assert');
 
 const color = require('./color');
-const Logger = require('./logger');
+const Logger = require('./logger').default;
 const env = require('./environment');
 const patterns = require('./patterns');
 const { expect } = require('./expectations');

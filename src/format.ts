@@ -17,7 +17,7 @@ export function prefixLines(prefix: string, text: string) {
   return text.split('\n').map(line => prefix + line).join('\n');
 };
 
-interface Formatters {
+export interface Formatters {
   [letter: string]: (value: any) => string;
 }
 
@@ -37,7 +37,7 @@ export function runFormatters(args: [string, any], formatters: Formatters) {
   return result;
 };
 
-interface FormatOptions {
+export interface FormatOptions {
   color?: string;
   diff?: number;
   formatters?: Formatters;

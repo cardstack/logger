@@ -1,17 +1,37 @@
-const format = require('./format');
-const levels = ['trace', 'debug', 'info', 'warn', 'error', 'none'];
+import { formatMessage, Formatters, FormatOptions } from './format';
 
-const {
+const levelsObj = {
+  trace: true,
+  debug: true,
+  info: true,
+  warn: true,
+  error: true,
+};
+
+const levels = Object.keys(levelsObj);
+
+export type Level = keyof typeof levelsObj;
+
+import {
   assertAllowedLog,
   isExpecting
-} = require('./expectations');
+} from './expectations';
 
-class Logger {
-  constructor(name, level, config={}) {
-    this.name = name;
-    this.level = level;
-    this.formatters = {};
+interface Options {
+  color?: string;
+  interactive?: boolean;
+  timestamps?: boolean;
+}
 
+export default class Logger {
+  private formatters: Formatters = {};
+  private color: Options["color"];
+  private interactive: Options["interactive"];
+  private timestamps: Options["timestamps"];
+  private _lastTimestamp: Date = new Date();
+  private _level: number;
+
+  constructor(private name: string, level: Level, config: Options={}) {
     let {
       color,
       interactive,
@@ -20,42 +40,34 @@ class Logger {
     this.color = color;
     this.interactive = interactive;
     this.timestamps = timestamps;
-    this._lastTimestamp = new Date();
-
+    this._level = levels.indexOf(level)
   }
 
-  _log(level, formatArgs) {
-    // we're in tests, because someone has called one of the log.expect... methods.
-    // Don't output the message, but do track that it was seen, and throw if it's
-    // unexpected.
-    if (isExpecting()) {
-      assertAllowedLog(this, level, formatArgs);
-    // the normal case. Output the message if the channel is configured to print
-    // messages of that importance.
+  _log(level: Level, formatArgs: [string, any]) {
+    if (assertAllowedLog(this, level, formatArgs)) {
+      // we're in tests, because someone has called one of the log.expect...
+      // methods. All the work is done inside assertAllowedLog.
     } else if (levels.indexOf(level) >= this._level) {
+      // the normal case. Output the message if the channel is configured to print
+      // messages of that importance.
       console.error(this.formatMessage(formatArgs));
     }
     // otherwise, do no work and output nothing
   }
 
-  // accepts string for easy translation from config
-  set level(newLevel) {
-    this._level = levels.indexOf(newLevel);
-  }
-
-  registerFormatter(letter, formatter) {
+  registerFormatter(letter: string, formatter: (value: any) => string) {
     if (this.formatters[letter]) {
       throw new Error(`A formatter for "${letter}" has already been registered`);
     }
     this.formatters[letter] = formatter;
   }
 
-  formatMessage(formatArgs) {
+  formatMessage(formatArgs: [string, any]) {
     let now = new Date();
     let prev = this._lastTimestamp;
     this._lastTimestamp = now;
 
-    let opts = {
+    let opts: FormatOptions = {
       formatters: this.formatters,
       interactive: this.interactive
     };
@@ -66,25 +78,23 @@ class Logger {
     if (this.timestamps) {
       // dates are diffs for interactive, timestamps for non-tty
       if (this.interactive) {
-        opts.diff = now - prev;
+        opts.diff = now.getTime() - prev.getTime();
       } else {
         opts.timestamp = now;
       }
     }
 
-    return format.formatMessage(formatArgs, this.name, opts);
+    return formatMessage(formatArgs, this.name, opts);
   }
 
   // log.log always outputs, for development stuff only
-  log(...formatArgs) {
+  log(...formatArgs: [string, any]) {
     console.error(this.formatMessage(formatArgs));
   }
 
-  trace(...formatArgs) { this._log('trace', formatArgs); }
-  debug(...formatArgs) { this._log('debug', formatArgs); }
-  info(...formatArgs) { this._log('info', formatArgs); }
-  warn(...formatArgs) { this._log('warn', formatArgs); }
-  error(...formatArgs) { this._log('error', formatArgs); }
-};
-
-module.exports = Logger;
+  trace(...formatArgs: [string, any]) { this._log('trace', formatArgs); }
+  debug(...formatArgs: [string, any]) { this._log('debug', formatArgs); }
+  info(...formatArgs: [string, any]) { this._log('info', formatArgs); }
+  warn(...formatArgs: [string, any]) { this._log('warn', formatArgs); }
+  error(...formatArgs: [string, any]) { this._log('error', formatArgs); }
+}
