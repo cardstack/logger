@@ -1,9 +1,9 @@
-const assert = require('assert');
-const env = require('@cardstack/logger/src/environment');
+import assert  from 'assert';
+import { parseEnv, parseLevelList } from '@cardstack/logger/src/environment';
 
 describe("Environment variable handling", function() {
   it("parses a list of channel patterns", function() {
-    let result = env.parseLevelList('a=warn,thing:*=debug');
+    let result = parseLevelList('a=warn,thing:*=debug');
     assert.deepEqual(result, [
         ['a', 'warn'],
         ['thing:*', 'debug']
@@ -15,7 +15,7 @@ describe("Environment variable handling", function() {
       DEFAULT_LOG_LEVEL: 'warn',
       LOG_LEVELS: 'this=that,third=other'
     };
-    let result = env.parseEnv(input);
+    let result = parseEnv(input);
     assert.deepEqual(result, {
       defaultLevel: 'warn',
       logLevels: [
@@ -26,7 +26,7 @@ describe("Environment variable handling", function() {
   });
 
   it("returns something useful when no overrides are present", function() {
-    let result = env.parseEnv({});
+    let result = parseEnv({});
     assert.deepEqual(result, {
       logLevels: []
     });
