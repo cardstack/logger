@@ -1,10 +1,10 @@
-const assert = require('assert');
-const path = require('path');
-const {promisify} = require('util');
-const child_process = require('child_process');
+import assert from "assert";
+import path from "path";
+import { promisify } from "util";
+import child_process from "child_process";
 const exec = promisify(child_process.execFile);
 
-const appPath = path.join(__dirname, 'example', 'app.js');
+const appPath = path.join(__dirname, "example", "app.js");
 
 describe("Acceptance", function() {
   it("App defaults are applied", async function() {
@@ -23,10 +23,13 @@ cardstack:b error
 cardstack:b log
 `;
 
-    let {stderr} = await exec('node', [appPath], {
-      env: Object.assign({
-        LOG_TIMESTAMPS: 'false'
-      }, process.env)
+    let { stderr } = await exec("node", [appPath], {
+      env: Object.assign(
+        {
+          LOG_TIMESTAMPS: "false",
+        },
+        process.env
+      ),
     });
     assert.equal(stderr, expected);
   });
@@ -47,12 +50,15 @@ cardstack:b error
 cardstack:b log
 `;
 
-    let {stderr} = await exec('node', [appPath], {
-      env: Object.assign({
-        DEFAULT_LOG_LEVEL: 'error',
-        LOG_LEVELS: 'whiny-dependency=none,cardstack:b=trace',
-        LOG_TIMESTAMPS: 'false',
-      }, process.env)
+    let { stderr } = await exec("node", [appPath], {
+      env: Object.assign(
+        {
+          DEFAULT_LOG_LEVEL: "error",
+          LOG_LEVELS: "whiny-dependency=none,cardstack:b=trace",
+          LOG_TIMESTAMPS: "false",
+        },
+        process.env
+      ),
     });
     assert.equal(stderr, expected);
   });
