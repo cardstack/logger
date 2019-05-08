@@ -82,7 +82,3 @@ export function makeExpectHandler(level: Level) {
   return expect;
 }
 
-function capitalize(str: string) {
-  return str.slice(0,1).toUpperCase() + str.slice(1);
-}
-
