@@ -11,13 +11,12 @@ describe('Global coordination between multiple instances of the module', functio
     assert.strictEqual(loggerModule, global.__global_cardstack_logger);
   });
 
-  it("calls getAPIWrapper() on an already-registered version", function() {
-    const stub = Symbol('stub');
+  it("uses an already-registered version", function() {
     global.__global_cardstack_logger = {
-      getAPIWrapper() { return stub; }
+      iAmFirst: true
     };
 
     let loggerModule = require('@cardstack/logger');
-    assert.strictEqual(loggerModule, stub);
+    assert.deepEqual(loggerModule, { iAmFirst: true });
   });
 });

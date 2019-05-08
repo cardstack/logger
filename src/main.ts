@@ -1,68 +1,55 @@
 import tty from 'tty';
-import assert from 'assert';
-
 import { choose as chooseColor } from './color';
 import Logger, { Level } from './logger';
 import { parseEnv } from './environment';
 import { findMatch, compile } from './patterns';
-import { expect, ExpectOptions, ExpectCallback } from './expectations';
-import compatibility from './compatibility';
+import { makeExpectHandler, ExpectOptions, ExpectCallback } from './expectations';
 
-function createLogger(name: string) {
-  let level = findMatch(createLogger.config.logLevels, name, createLogger.config.defaultLevel);
-  let log = new Logger(name, level, {
-    color: chooseColor(name),
-    interactive: createLogger.config.interactive
-  });
-  createLogger.instances.push(log);
-  return log;
-}
+const instances: Logger[] = [];
 
-export type CreateLogger = typeof createLogger;
-
-createLogger.config = {
+const config = {
   defaultLevel: 'info' as Level,
   interactive: tty.isatty(2), // STDERR is always file descriptor 2
   logLevels: [] as ([RegExp, Level])[],
   timestamps: process.env.LOG_TIMESTAMPS !== 'false'
 };
-createLogger.instances = [] as Logger[];
 
-createLogger.configure = function(appConfig: { defaultLevel?: Level, logLevels?: ([string, Level])[] } = {}) {
-  let overrides = parseEnv(process.env);
-
-  createLogger.config.defaultLevel = overrides.defaultLevel || appConfig.defaultLevel || 'info';
-
-  let logLevels = (appConfig.logLevels || []).concat(overrides.logLevels);
-  createLogger.config.logLevels = logLevels.map(([pattern, level]) => [compile(pattern), level]);
-
-  createLogger.instances.forEach(function(log) {
-    log.level = findMatch(createLogger.config.logLevels, log.name, createLogger.config.defaultLevel);
+const createLogger = Object.assign(function createLogger(name: string) {
+  let level = findMatch(config.logLevels, name, config.defaultLevel);
+  let log = new Logger(name, level, {
+    color: chooseColor(name),
+    interactive: config.interactive
   });
-}
+  instances.push(log);
+  return log;
+}, {
+  configure(appConfig: { defaultLevel?: Level, logLevels?: ([string, Level])[] } = {}) {
+    let overrides = parseEnv(process.env);
 
-let expectationMethods = {
-  expectTrace(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
-    return expect('trace', pattern, options, fn);
-  },
-  expectDebug(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
-    return expect('debug', pattern, options, fn);
-  },
-  expectInfo(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
-    return expect('info', pattern, options, fn);
-  },
-  expectWarn(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
-    return expect('warn', pattern, options, fn);
-  },
-  expectError(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback) {
-    return expect('error', pattern, options, fn);
-  }
-};
+    config.defaultLevel = overrides.defaultLevel || appConfig.defaultLevel || 'info';
 
-Object.assign(createLogger, expectationMethods);
+    let logLevels = (appConfig.logLevels || []).concat(overrides.logLevels);
+    config.logLevels = logLevels.map(([pattern, level]) => [compile(pattern), level]);
+
+    instances.forEach(function(log) {
+      log.level = findMatch(config.logLevels, log.name, config.defaultLevel);
+    });
+  },
+  getAPIWrapper(version: string) {
+    // In the future, we can parse the passed version string, and construct
+    // backwards-compatible API wrappers for older versions
+    return this;
+  },
+
+  expectTrace: makeExpectHandler('trace'),
+  expectDebug: makeExpectHandler('debug'),
+  expectInfo: makeExpectHandler('info'),
+  expectWarn: makeExpectHandler('warn'),
+  expectError: makeExpectHandler('error'),
+});
+
+export default createLogger;
+export type CreateLogger = typeof createLogger;
 
 createLogger.configure() // pull in the environment config, in case app doesn't configure
-export default createLogger;
 
-// at the end, so as to be careful about a cyclical dependency.
-createLogger.getAPIWrapper = compatibility;

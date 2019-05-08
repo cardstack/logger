@@ -39,44 +39,46 @@ export interface ExpectOptions {
 
 export type ExpectCallback = () => void | Promise<void>;
 
-export async function expect(level: Level, pattern: RegExp, fn: ExpectCallback): Promise<void>
-export async function expect(level: Level, pattern: RegExp, options: ExpectOptions, fn: ExpectCallback): Promise<void>
-export async function expect(level: Level, pattern: RegExp, maybeOptions: ExpectOptions | ExpectCallback, maybeFn?: ExpectCallback): Promise<void> {
+export function makeExpectHandler(level: Level) {
+  async function expect(pattern: RegExp, fn: ExpectCallback): Promise<void>
+  async function expect(pattern: RegExp, options: ExpectOptions, fn: ExpectCallback): Promise<void>
+  async function expect(pattern: RegExp, maybeOptions: ExpectOptions | ExpectCallback, maybeFn?: ExpectCallback): Promise<void> {
+    let fn: ExpectCallback;
+    let options: ExpectOptions;
 
-  let fn: ExpectCallback;
-  let options: ExpectOptions;
+    if (typeof maybeOptions === 'function') {
+      fn = maybeOptions;
+      options = {};
+    } else {
+      fn = maybeFn!;
+      options = maybeOptions;
+    }
 
-  if (typeof maybeOptions === 'function') {
-    fn = maybeOptions;
-    options = {};
-  } else {
-    fn = maybeFn!;
-    options = maybeOptions;
+    if (expectation) {
+      throw new Error("Unfortunately, nested expectations are not supported. If you feel they are important, please file an issue");
+    }
+
+    let count = options.count || 1;
+
+    let ourExpectation = {
+      level,
+      pattern,
+      matches: 0,
+      allowed: options.allowed || ['trace', 'debug', 'info']
+    };
+    expectation = ourExpectation;
+    try {
+      await fn();
+    } finally {
+      expectation = null;
+    }
+    if (ourExpectation.matches === 0) {
+      throw new Error(`Expected a log message to match ${pattern} but none did`);
+    } else if (ourExpectation.matches !== count) {
+      throw new Error(`Wrong number of logs matching ${pattern}. Expected ${count}, got ${ourExpectation.matches}`);
+    }
   }
-
-  if (expectation) {
-    throw new Error("Unfortunately, nested expectations are not supported. If you feel they are important, please file an issue");
-  }
-
-  let count = options.count || 1;
-
-  let ourExpectation = {
-    level,
-    pattern,
-    matches: 0,
-    allowed: options.allowed || ['trace', 'debug', 'info']
-  };
-  expectation = ourExpectation;
-  try {
-    await fn();
-  } finally {
-    expectation = null;
-  }
-  if (ourExpectation.matches === 0) {
-    throw new Error(`Expected a log message to match ${pattern} but none did`);
-  } else if (ourExpectation.matches !== count) {
-    throw new Error(`Wrong number of logs matching ${pattern}. Expected ${count}, got ${ourExpectation.matches}`);
-  }
+  return expect;
 }
 
 function capitalize(str: string) {
