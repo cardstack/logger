@@ -1,5 +1,6 @@
 support
 test
+spec
 examples
 example
 *.sock
