@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import createLogger, { CreateLogger } from './main';
 
 interface LoggerGlobal {

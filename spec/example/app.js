@@ -1,4 +1,4 @@
-const logger = require('@cardstack/logger');
+const logger = require('../..');
 
 // create some before the configure call to check it invalidates properly
 let dep = logger('dependency');

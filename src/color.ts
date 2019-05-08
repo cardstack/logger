@@ -26,6 +26,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 export let colors = [ 6, 2, 3, 4, 5, 1 ];   // named terminal colors
 try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, node/no-extraneous-require
   var supportsColor = require('supports-color');
   if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
     // 8-bit color codes
@@ -50,5 +51,5 @@ export function choose(name: string) {
   }
 
   return colors[Math.abs(hash) % colors.length];
-};
+}
 

@@ -4,7 +4,7 @@ export function parseLevelList(str: string) {
   return str.split(',').map(function(pair) {
     return pair.split('=') as [string, Level];
   });
-};
+}
 
 export function parseEnv(env: typeof process.env) {
   let result: {

@@ -1,5 +1,5 @@
 const assert = require('assert');
-const format = require('@cardstack/logger/src/format');
+const format = require('../src/format');
 
 describe("Formatter", function() {
   describe("#color", function() {

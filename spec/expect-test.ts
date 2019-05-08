@@ -1,5 +1,5 @@
 import assert from 'assert';
-import logger from '@cardstack/logger';
+import logger from '..';
 
 const log = logger('expect');
 

@@ -1,8 +1,8 @@
 import assert from "assert";
 import path from "path";
 import { promisify } from "util";
-import child_process from "child_process";
-const exec = promisify(child_process.execFile);
+import { execFile as cpExecFile } from "child_process";
+const exec = promisify(cpExecFile);
 
 const appPath = path.join(__dirname, "example", "app.js");
 

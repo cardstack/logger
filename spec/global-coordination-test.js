@@ -7,7 +7,7 @@ describe('Global coordination between multiple instances of the module', functio
   });
 
   it("registers itself globally if it's the first loaded", function() {
-    let loggerModule = require('@cardstack/logger');
+    let loggerModule = require('..');
     assert.strictEqual(loggerModule, global.__global_cardstack_logger);
   });
 
@@ -16,7 +16,7 @@ describe('Global coordination between multiple instances of the module', functio
       iAmFirst: true
     };
 
-    let loggerModule = require('@cardstack/logger');
+    let loggerModule = require('..');
     assert.deepEqual(loggerModule, { iAmFirst: true });
   });
 });

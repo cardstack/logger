@@ -3,7 +3,7 @@ import { choose as chooseColor } from './color';
 import Logger, { Level } from './logger';
 import { parseEnv } from './environment';
 import { findMatch, compile } from './patterns';
-import { makeExpectHandler, ExpectOptions, ExpectCallback } from './expectations';
+import { makeExpectHandler } from './expectations';
 
 const instances: Logger[] = [];
 
@@ -23,7 +23,7 @@ const createLogger = Object.assign(function createLogger(name: string) {
   instances.push(log);
   return log;
 }, {
-  configure(appConfig: { defaultLevel?: Level, logLevels?: ([string, Level])[] } = {}) {
+  configure(appConfig: { defaultLevel?: Level; logLevels?: ([string, Level])[] } = {}) {
     let overrides = parseEnv(process.env);
 
     config.defaultLevel = overrides.defaultLevel || appConfig.defaultLevel || 'info';
@@ -34,11 +34,6 @@ const createLogger = Object.assign(function createLogger(name: string) {
     instances.forEach(function(log) {
       log.level = findMatch(config.logLevels, log.name, config.defaultLevel);
     });
-  },
-  getAPIWrapper(version: string) {
-    // In the future, we can parse the passed version string, and construct
-    // backwards-compatible API wrappers for older versions
-    return this;
   },
 
   expectTrace: makeExpectHandler('trace'),
@@ -51,5 +46,5 @@ const createLogger = Object.assign(function createLogger(name: string) {
 export default createLogger;
 export type CreateLogger = typeof createLogger;
 
-createLogger.configure() // pull in the environment config, in case app doesn't configure
+createLogger.configure(); // pull in the environment config, in case app doesn't configure
 

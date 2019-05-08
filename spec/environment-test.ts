@@ -1,12 +1,12 @@
 import assert  from 'assert';
-import { parseEnv, parseLevelList } from '@cardstack/logger/src/environment';
+import { parseEnv, parseLevelList } from '../src/environment';
 
 describe("Environment variable handling", function() {
   it("parses a list of channel patterns", function() {
     let result = parseLevelList('a=warn,thing:*=debug');
     assert.deepEqual(result, [
-        ['a', 'warn'],
-        ['thing:*', 'debug']
+      ['a', 'warn'],
+      ['thing:*', 'debug']
     ]);
   });
 

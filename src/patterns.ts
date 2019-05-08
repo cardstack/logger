@@ -1,6 +1,6 @@
 export function compile(str: string) {
   return new RegExp(str.split('*').map(escapeRegExp).join('.*'), 'i');
-};
+}
 
 // https://codereview.stackexchange.com/a/153702
 function escapeRegExp(string: string){
@@ -15,4 +15,4 @@ export function findMatch<T>(rules: ([RegExp, T])[], value: string, defaultVal: 
     }
   }
   return defaultVal;
-};
+}

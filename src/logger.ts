@@ -1,4 +1,5 @@
 import { formatMessage, Formatters, FormatOptions, FormatArgs } from './format';
+import { assertAllowedLog} from './expectations';
 
 const levelsObj = {
   trace: true,
@@ -12,11 +13,6 @@ const levelsObj = {
 const levels = Object.keys(levelsObj);
 
 export type Level = keyof typeof levelsObj;
-
-import {
-  assertAllowedLog,
-  isExpecting
-} from './expectations';
 
 interface Options {
   color?: number;
@@ -41,7 +37,7 @@ export default class Logger {
     this.color = color;
     this.interactive = interactive;
     this.timestamps = timestamps;
-    this._level = levels.indexOf(level)
+    this._level = levels.indexOf(level);
   }
 
   _log(level: Level, formatArgs: FormatArgs) {
@@ -51,6 +47,7 @@ export default class Logger {
     } else if (levels.indexOf(level) >= this._level) {
       // the normal case. Output the message if the channel is configured to print
       // messages of that importance.
+      // eslint-disable-next-line no-console
       console.error(this.formatMessage(formatArgs));
     }
     // otherwise, do no work and output nothing
@@ -94,6 +91,7 @@ export default class Logger {
 
   // log.log always outputs, for development stuff only
   log(...formatArgs: FormatArgs) {
+    // eslint-disable-next-line no-console
     console.error(this.formatMessage(formatArgs));
   }
 

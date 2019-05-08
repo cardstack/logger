@@ -5,6 +5,7 @@ build
 npm-debug.log
 dist
 coverage
+.eslintcache
 
 # lockfiles
 yarn.lock

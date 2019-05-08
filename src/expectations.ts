@@ -3,15 +3,11 @@ import Logger, { Level } from './logger';
 import { FormatArgs } from './format';
 
 let expectation: {
-  level: Level,
-  pattern: RegExp,
-  matches: number,
-  allowed: string[]
+  level: Level;
+  pattern: RegExp;
+  matches: number;
+  allowed: string[];
 } | null = null;
-
-export function isExpecting() {
-  return !!expectation;
-}
 
 export function assertAllowedLog(instance: Logger, level: Level, formatArgs: FormatArgs) {
   if (level === 'none') {

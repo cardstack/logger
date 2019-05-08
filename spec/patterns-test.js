@@ -1,5 +1,5 @@
 const assert = require('assert');
-const patterns = require('@cardstack/logger/src/patterns');
+const patterns = require('../src/patterns');
 
 describe("Channel pattern stuff", function() {
   describe("#compile", function() {

@@ -1,5 +1,5 @@
-const util = require('util');
-const humanize = require('ms');
+import { format } from 'util';
+import humanize from 'ms';
 
 export function color(text: string, colorVal: number, {bold}: { bold?: boolean } = {}) {
   let colorString: string;
@@ -12,11 +12,11 @@ export function color(text: string, colorVal: number, {bold}: { bold?: boolean }
     colorString = '1;'+colorString;
   }
   return `\u001b[${colorString}m${text}\u001b[0m`;
-};
+}
 
 export function prefixLines(prefix: string, text: string) {
   return text.split('\n').map(line => prefix + line).join('\n');
-};
+}
 
 export interface Formatters {
   [letter: string]: (value: any) => string;
@@ -36,7 +36,7 @@ export function runFormatters(args: FormatArgs, formatters: Formatters) {
     }
   });
   return result;
-};
+}
 
 export interface FormatOptions {
   color?: number;
@@ -62,7 +62,8 @@ export function formatMessage(args: FormatArgs, channel: string, options: Format
   // run custom formatters
   args = runFormatters(args, formatters);
   // run builtin formatters
-  let text = util.format(...args);
+  let [pattern, ...rest] = args;
+  let text = format(pattern, ...rest);
 
   if (colorVal) {
     channel = color(channel, colorVal, {bold:true});
@@ -86,7 +87,7 @@ export function formatMessage(args: FormatArgs, channel: string, options: Format
     if (colorVal) {
       suffix = color(suffix, colorVal);
     }
-    suffix = ' ' + suffix
+    suffix = ' ' + suffix;
   }
 
   // when going to the terminal it's nice for indentation's
@@ -98,5 +99,5 @@ export function formatMessage(args: FormatArgs, channel: string, options: Format
   } else {
     return prefix + text + suffix;
   }
-};
+}
 
