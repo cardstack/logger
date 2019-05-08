@@ -2,7 +2,7 @@ const assert = require('assert');
 
 describe('Global coordination between multiple instances of the module', function() {
   beforeEach(function() {
-    delete require.cache[require.resolve('@cardstack/logger')];
+    delete require.cache[require.resolve('..')];
     delete global.__global_cardstack_logger;
   });
 
