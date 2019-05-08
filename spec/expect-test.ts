@@ -1,5 +1,5 @@
-const assert = require('assert');
-const logger = require('@cardstack/logger');
+import assert from 'assert';
+import logger from '..';
 
 const log = logger('expect');
 

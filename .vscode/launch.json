@@ -1,0 +1,30 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Logger tests",
+      "program": "${workspaceFolder}/node_modules/.bin/_mocha",
+      "args": [
+        "spec"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Logger example",
+      "program": "${workspaceFolder}/spec/example/app.js",
+      "args": [
+      ],
+      "env": {
+        "DEFAULT_LOG_LEVEL": "error",
+        "LOG_LEVELS": "whiny-dependency=none,cardstack:b=trace",
+        "LOG_TIMESTAMPS": "false",
+      }
+    }
+  ]
+}

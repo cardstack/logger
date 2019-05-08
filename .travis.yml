@@ -3,18 +3,12 @@ sudo: false
 language: node_js
 
 node_js:
-  - "4"
-  - "6"
   - "8"
+  - "10"
 
 install:
-  - make install
+  - yarn install
 
 script:
-  - make lint
-  - make test
-
-matrix:
-  include:
-  - node_js: '8'
-    env: BROWSER=1
+  - yarn lint
+  - yarn test
