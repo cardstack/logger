@@ -22,11 +22,10 @@ export interface Formatters {
   [letter: string]: (value: any) => string;
 }
 
-export function runFormatters(args: FormatArgs, formatters: Formatters) {
-  let result = args.slice() as FormatArgs;
-  let str = result[0];
-  let index = 0;
-  result[0] = str.replace(/%([a-zA-Z])/g, function(match, letter) {
+export function runFormatters(msg: string, params: any[], formatters: Formatters) {
+  let result = params.slice();
+  let index = -1;
+  let formattedMessage = msg.replace(/%([a-zA-Z])/g, function(match, letter) {
     index++;
     if (formatters[letter]) {
       result[index] = formatters[letter](result[index]);
@@ -35,7 +34,7 @@ export function runFormatters(args: FormatArgs, formatters: Formatters) {
       return match;
     }
   });
-  return result;
+  return [formattedMessage, ...result];
 }
 
 export interface FormatOptions {
@@ -46,9 +45,7 @@ export interface FormatOptions {
   timestamp?: Date;
 }
 
-export type FormatArgs = [string, any] | [string];
-
-export function formatMessage(args: FormatArgs, channel: string, options: FormatOptions={}) {
+export function formatMessage(msg: string, params: any[], channel: string, options: FormatOptions={}) {
   let {
     color: colorVal,
     diff,
@@ -60,10 +57,9 @@ export function formatMessage(args: FormatArgs, channel: string, options: Format
   formatters = formatters || {};
 
   // run custom formatters
-  args = runFormatters(args, formatters);
+  let [msg2, ...rest] = runFormatters(msg, params, formatters);
   // run builtin formatters
-  let [pattern, ...rest] = args;
-  let text = format(pattern, ...rest);
+  let text = format(msg2, ...rest);
 
   if (colorVal) {
     channel = color(channel, colorVal, {bold:true});

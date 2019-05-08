@@ -1,4 +1,4 @@
-import { formatMessage, Formatters, FormatOptions, FormatArgs } from './format';
+import { formatMessage, Formatters, FormatOptions } from './format';
 import { assertAllowedLog} from './expectations';
 
 const levelsObj = {
@@ -40,15 +40,15 @@ export default class Logger {
     this._level = levels.indexOf(level);
   }
 
-  _log(level: Level, formatArgs: FormatArgs) {
-    if (assertAllowedLog(this, level, formatArgs)) {
+  _log(level: Level, msg: string, params: any[]) {
+    if (assertAllowedLog(this, level, msg, params)) {
       // we're in tests, because someone has called one of the log.expect...
       // methods. All the work is done inside assertAllowedLog.
     } else if (levels.indexOf(level) >= this._level) {
       // the normal case. Output the message if the channel is configured to print
       // messages of that importance.
       // eslint-disable-next-line no-console
-      console.error(this.formatMessage(formatArgs));
+      console.error(this.formatMessage(msg, params));
     }
     // otherwise, do no work and output nothing
   }
@@ -64,7 +64,7 @@ export default class Logger {
     this._level = levels.indexOf(level);
   }
 
-  formatMessage(formatArgs: FormatArgs) {
+  formatMessage(msg: string, params: any[]) {
     let now = new Date();
     let prev = this._lastTimestamp;
     this._lastTimestamp = now;
@@ -86,18 +86,18 @@ export default class Logger {
       }
     }
 
-    return formatMessage(formatArgs, this.name, opts);
+    return formatMessage(msg, params, this.name, opts);
   }
 
   // log.log always outputs, for development stuff only
-  log(...formatArgs: FormatArgs) {
+  log(msg: string, ...params: any[]) {
     // eslint-disable-next-line no-console
-    console.error(this.formatMessage(formatArgs));
+    console.error(this.formatMessage(msg, params));
   }
 
-  trace(...formatArgs: FormatArgs) { this._log('trace', formatArgs); }
-  debug(...formatArgs: FormatArgs) { this._log('debug', formatArgs); }
-  info(...formatArgs: FormatArgs) { this._log('info', formatArgs); }
-  warn(...formatArgs: FormatArgs) { this._log('warn', formatArgs); }
-  error(...formatArgs: FormatArgs) { this._log('error', formatArgs); }
+  trace(msg: string, ...params: any[]) { this._log('trace', msg, params); }
+  debug(msg: string, ...params: any[]) { this._log('debug', msg, params); }
+  info(msg: string, ...params: any[]) { this._log('info', msg, params); }
+  warn(msg: string, ...params: any[]) { this._log('warn', msg, params); }
+  error(msg: string, ...params: any[]) { this._log('error', msg, params); }
 }

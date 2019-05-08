@@ -31,3 +31,6 @@ package-lock.json
 /spec/example/app.js
 /spec/example/app.js.map
 /spec/example/app.d.ts
+/spec/formatting-test.js
+/spec/formatting-test.js.map
+/spec/formatting-test.d.ts

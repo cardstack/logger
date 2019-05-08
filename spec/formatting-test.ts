@@ -1,5 +1,5 @@
-const assert = require('assert');
-const format = require('../src/format');
+import assert from 'assert';
+import * as format from '../src/format';
 
 describe("Formatter", function() {
   describe("#color", function() {
@@ -36,7 +36,7 @@ world
 
   describe("#runFormatters", function() {
     it("will run formatters found in the formatter dictionary", function() {
-      let result = format.runFormatters(["%d and %h", 50, {}], {
+      let result = format.runFormatters("%d and %h", [50, {}], {
         h: () => "hello"
       });
 
@@ -46,28 +46,28 @@ world
 
   describe("#formatMessage", function() {
     it("prefixes lines with the channel name when interactive", function() {
-      let result = format.formatMessage(["hi\nhello"], "test", {
+      let result = format.formatMessage("hi\nhello", [], "test", {
         interactive: true
       });
       assert.equal(result, "  test hi\n  test hello");
     });
 
     it("prefixes once with the channel name when not interactive", function() {
-      let result = format.formatMessage(["hi\nhello"], "test", {
+      let result = format.formatMessage("hi\nhello", [], "test", {
         interactive: false
       });
       assert.equal(result, "test hi\nhello");
     });
 
     it("runs util formatters", function() {
-      let result = format.formatMessage(["%s", "hi"], "test", {
+      let result = format.formatMessage("%s", ["hi"], "test", {
         interactive: true
       });
       assert.equal(result, "  test hi");
     });
 
     it("runs custom formatters", function() {
-      let result = format.formatMessage(["%h", 5], "test", {
+      let result = format.formatMessage("%h", [5], "test", {
         formatters: {
           h: () => "hi"
         }
@@ -76,21 +76,21 @@ world
     });
 
     it("appends a diff", function() {
-      let result = format.formatMessage(["hi"], "test", {
+      let result = format.formatMessage("hi", [], "test", {
         diff: 700
       });
       assert.equal(result, "test hi +700ms");
     });
 
     it("prepends a timestamp", function() {
-      let result = format.formatMessage(["hi"], "test", {
+      let result = format.formatMessage("hi", [], "test", {
         timestamp: new Date('2012-12-12')
       });
       assert.equal(result, "2012-12-12T00:00:00.000Z test hi");
     });
 
     it("colors the channel name and millisecond diff", function() {
-      let result = format.formatMessage(["hi"], "test", {
+      let result = format.formatMessage("hi", [], "test", {
         color: 4,
         diff: 120
       });
