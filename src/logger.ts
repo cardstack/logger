@@ -1,4 +1,4 @@
-import { formatMessage, Formatters, FormatOptions } from './format';
+import { formatMessage, Formatters, FormatOptions, FormatArgs } from './format';
 
 const levelsObj = {
   trace: true,
@@ -44,7 +44,7 @@ export default class Logger {
     this._level = levels.indexOf(level)
   }
 
-  _log(level: Level, formatArgs: [string, any]) {
+  _log(level: Level, formatArgs: FormatArgs) {
     if (assertAllowedLog(this, level, formatArgs)) {
       // we're in tests, because someone has called one of the log.expect...
       // methods. All the work is done inside assertAllowedLog.
@@ -67,7 +67,7 @@ export default class Logger {
     this._level = levels.indexOf(level);
   }
 
-  formatMessage(formatArgs: [string, any]) {
+  formatMessage(formatArgs: FormatArgs) {
     let now = new Date();
     let prev = this._lastTimestamp;
     this._lastTimestamp = now;
@@ -93,13 +93,13 @@ export default class Logger {
   }
 
   // log.log always outputs, for development stuff only
-  log(...formatArgs: [string, any]) {
+  log(...formatArgs: FormatArgs) {
     console.error(this.formatMessage(formatArgs));
   }
 
-  trace(...formatArgs: [string, any]) { this._log('trace', formatArgs); }
-  debug(...formatArgs: [string, any]) { this._log('debug', formatArgs); }
-  info(...formatArgs: [string, any]) { this._log('info', formatArgs); }
-  warn(...formatArgs: [string, any]) { this._log('warn', formatArgs); }
-  error(...formatArgs: [string, any]) { this._log('error', formatArgs); }
+  trace(...formatArgs: FormatArgs) { this._log('trace', formatArgs); }
+  debug(...formatArgs: FormatArgs) { this._log('debug', formatArgs); }
+  info(...formatArgs: FormatArgs) { this._log('info', formatArgs); }
+  warn(...formatArgs: FormatArgs) { this._log('warn', formatArgs); }
+  error(...formatArgs: FormatArgs) { this._log('error', formatArgs); }
 }

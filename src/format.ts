@@ -22,8 +22,8 @@ export interface Formatters {
   [letter: string]: (value: any) => string;
 }
 
-export function runFormatters(args: [string, any], formatters: Formatters) {
-  let result = args.slice() as [string, any];
+export function runFormatters(args: FormatArgs, formatters: Formatters) {
+  let result = args.slice() as FormatArgs;
   let str = result[0];
   let index = 0;
   result[0] = str.replace(/%([a-zA-Z])/g, function(match, letter) {
@@ -46,7 +46,9 @@ export interface FormatOptions {
   timestamp?: Date;
 }
 
-export function formatMessage(args: [string, any], channel: string, options: FormatOptions={}) {
+export type FormatArgs = [string, any] | [string];
+
+export function formatMessage(args: FormatArgs, channel: string, options: FormatOptions={}) {
   let {
     color: colorVal,
     diff,

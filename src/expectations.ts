@@ -1,5 +1,6 @@
 import assert from 'assert';
 import Logger, { Level } from './logger';
+import { FormatArgs } from './format';
 
 let expectation: {
   level: Level,
@@ -12,7 +13,7 @@ export function isExpecting() {
   return !!expectation;
 }
 
-export function assertAllowedLog(instance: Logger, level: Level, formatArgs: [string, any]) {
+export function assertAllowedLog(instance: Logger, level: Level, formatArgs: FormatArgs) {
   if (level === 'none') {
     throw new Error("You can't expectNone");
   }
