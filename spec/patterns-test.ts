@@ -1,5 +1,5 @@
-const assert = require('assert');
-const patterns = require('../src/patterns');
+import assert from 'assert';
+import * as patterns from '../src/patterns';
 
 describe("Channel pattern stuff", function() {
   describe("#compile", function() {
@@ -18,18 +18,18 @@ describe("Channel pattern stuff", function() {
 
   describe("#findMatch", function() {
     it("finds the last matching value from a list", function() {
-      let rules = [
+      let rules: ([RegExp, number])[] = [
         [/q/, 0],
         [/[abc]/, 1],
         [/./, 2]
       ];
-      let result = patterns.findMatch(rules, 'b');
+      let result = patterns.findMatch(rules, 'b', 100);
       assert.equal(result, 2);
     });
 
     it("returns the default if none match", function() {
-      let rules = [
-        [/q/, 0]
+      let rules: ([RegExp, string])[] = [
+        [/q/, 'thing']
       ];
       let result = patterns.findMatch(rules, 'b', 'none');
       assert.equal(result, 'none');
