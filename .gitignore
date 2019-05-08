@@ -34,3 +34,6 @@ package-lock.json
 /spec/formatting-test.js
 /spec/formatting-test.js.map
 /spec/formatting-test.d.ts
+/spec/global-coordination-test.js
+/spec/global-coordination-test.js.map
+/spec/global-coordination-test.d.ts
