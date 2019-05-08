@@ -1,4 +1,4 @@
-const logger = require('../..');
+import logger from '../..';
 
 // create some before the configure call to check it invalidates properly
 let dep = logger('dependency');
@@ -21,8 +21,11 @@ let b = logger('cardstack:b');
 // a trace, debug, ... log
 // b trace, debug, ... log
 for (let log of [dep, noisy, a, b]) {
-  for (let level of ['trace', 'debug', 'info', 'warn', 'error', 'log']) {
-    log[level](level);
-  }
+  log.trace('trace');
+  log.debug('debug');
+  log.info('info');
+  log.warn('warn');
+  log.error('error');
+  log.log('log');
 }
 //hey

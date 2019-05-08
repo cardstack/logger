@@ -28,3 +28,6 @@ package-lock.json
 /spec/expect-test.js
 /spec/expect-test.js.map
 /spec/expect-test.d.ts
+/spec/example/app.js
+/spec/example/app.js.map
+/spec/example/app.d.ts
