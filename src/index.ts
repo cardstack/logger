@@ -11,4 +11,5 @@ if (!g.__global_cardstack_logger) {
   g.__global_cardstack_logger = createLogger;
 }
 
-export = g.__global_cardstack_logger!;
+// @ts-ignore
+export = g.__global_cardstack_logger!; // ts-ignoring this so we dont get spurrious lint errors when using ES6 modules via ESM
