@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import createLogger, { CreateLogger } from './main';
 
+export type { default as Logger, Level } from './logger';
+
 interface LoggerGlobal {
   __global_cardstack_logger: CreateLogger | undefined;
 }
