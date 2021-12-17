@@ -7,10 +7,6 @@ dist
 coverage
 .eslintcache
 
-# lockfiles
-yarn.lock
-package-lock.json
-
 # typescript build output
 /src/**/*.js
 /src/**/*.js.map
